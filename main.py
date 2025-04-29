@@ -1,64 +1,56 @@
-import numpy as np
-from PIL import Image
-import random
+from canvas import Canvas, color_map
+from shapes import Rectangle, Square
+import os
 
-color_map = {
-            "white": (255, 255, 255),
-            "black": (0, 0, 0),
-            "red": (255, 0, 0),
-            "green": (0, 255, 0),
-            "blue": (0, 0, 255),
-            "yellow": (255, 255, 0),
-            "purple": (128, 0, 128),
-            "cyan": (0, 255, 255),
-            "magenta": (255, 0, 255),
-        }
+canvas_width = int(input("Enter Canvas width: "))
+canvas_height = int(input("Enter Canvas height: "))
+canvas_color = input("Enter canvas color: ")
 
-class Canvas:
-    def __init__(self, height, width, color, format):
-        self.height = height
-        self.width = width
-        self.color = color.lower()
-        self.image_number = random.randint(100, 200)
-        self.format = format.lower()
-        self.data = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        self.rgb = color_map.get(self.color, (255, 255, 255))
-        self.data[:] = self.rgb
+while canvas_color not in color_map:
+    canvas_color = input("Please introduce a valid color: ").lower()
 
-    def make(self):
-        img = Image.fromarray(self.data, 'RGB')
-        img.save(f"./images/canvas{self.image_number}.{self.format}")
+format_not_accepted = True
+while format_not_accepted:
+    image_format = input("Please introduce the output format of your image:")
+    if image_format.lower() in ("jpeg", "png", "raw", "tiff"):
+        format_not_accepted = False
+    else:
+        print("\n" * 100)
+        print("Please Introduce a valid format")
 
+canvas = Canvas(height=canvas_height, width=canvas_width, color=canvas_color, format="jpg")
 
-class Rectangle:
-    def __init__(self, x, y, width, height, color):
-        self.x = x
-        self.y = y
-        self.color = color.lower()
-        self.rgb = color_map.get(self.color, (255, 255, 255))
-        self.width = width
-        self.height = height
+while True:
+    shape_type = input("What do you like to draw? (Square or Rectangle?) Enter quit to quit. ").capitalize()
+    if shape_type in ("Square", "Rectangle"):
+        try:
+            init_pos_x = int(input(f"Enter the x of the {shape_type.lower()}: "))
+            init_pos_y = int(input(f"Enter the y of the {shape_type.lower()}: "))
+        except ValueError:
+            print("Coordinates must be integers. Try again.")
+            continue
 
-    def draw(self, canvas):
-        canvas.data[self.x:self.x + self.height, self.y: self.y + self.width] = self.rgb
+        object_color = input(f"Choose a color for your {shape_type.lower()}: ").lower()
+        while object_color not in color_map:
+            object_color = input("Please introduce a valid color: ").lower()
 
+        if shape_type == "Rectangle":
+            rec_height = int(input("Please introduce the height of the Rectangle: "))
+            rec_width = int(input("Please introduce the width of the Rectangle: "))
+            object = Rectangle(init_pos_x, init_pos_y, rec_width, rec_height, object_color)
+        else:
+            square_size = int(input("Please, introduce the size of the square side: "))
+            object = Square(init_pos_x, init_pos_y, square_size, object_color)
+        object.draw(canvas)
+    elif shape_type == "Quit":
+        canvas.make()
+        break
+    else:
+        print("\n" * 100)
+        print("Please introduce a valid shape (Square or Rectangle).")
 
-class Square:
-    def __init__(self, x, y, size, color):
-        self.x = x
-        self.y = y
-        self.size = size
-        self.color = color.lower()
-        self.rgb = color_map.get(self.color, (255, 255, 255))
-
-
-    def draw(self, canvas):
-        canvas.data[self.x:self.x + self.size, self.y: self.y + self.size] = self.rgb
-
-
-canvas = Canvas(height=100, width=130, color="purple", format="jpg")
-r1 = Rectangle(x=10, y=20, color="yellow", width=10, height=2)
-r1.draw(canvas)
-s1 = Square(5, 7, 20, "blue")
-s1.draw(canvas)
-canvas.make()
+# r1 = Rectangle(x=10, y=20, color="orange", width=10, height=2)
+# r1.draw(canvas)
+# s1 = Square(5, 7, 20, "blue")
+# s1.draw(canvas)
+# canvas.make()
